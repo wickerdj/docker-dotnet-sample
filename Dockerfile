@@ -24,6 +24,8 @@ WORKDIR /source/src
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet publish -a ${TARGETARCH/amd64/x64} --use-current-runtime --self-contained false -o /app
 
+RUN dotnet test /source/tests
+
 # If you need to enable globalization and time zones:
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
 ################################################################################
@@ -31,7 +33,12 @@ RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
 # runtime dependencies for the application. This often uses a different base
 # image from the build stage where the necessary files are copied from the build
 # stage.
-#
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS development
+COPY . /source
+WORKDIR /source/src
+CMD dotnet run --no-launch-profile
+
 # The example below uses an aspnet alpine image as the foundation for running the app.
 # It will also use whatever happens to be the most recent version of that tag when you
 # build your Dockerfile. If reproducability is important, consider using a more specific
